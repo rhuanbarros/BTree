@@ -14,6 +14,8 @@ public class BTree {
 			raiz.imprimir();
 			System.out.println("\n");
 		}
+		System.out.println("FIMMMMMMMMMMMMMMMMMMMM");
+		
 	}
 
 	public void inserir(int v, Nodo nodo) {
@@ -31,7 +33,7 @@ public class BTree {
 	}
 
 	public static void main(String[] args) {
-		int[] valoresParaInserir = { 3, 7, 10, 24, 14, 19, 21, 15, 1, 5, 2, 8, 9, 6, 11, 12, 17, 18, 20, 22, 23};// 25};
+		int[] valoresParaInserir = { 3, 7, 10, 24, 14, 19, 21, 15, 1, 5, 2, 8, 9, 6, 11, 12, 17, 18, 20, 22, 23, 25};
 		new BTree(5, valoresParaInserir);
 	}
 
@@ -110,10 +112,15 @@ public class BTree {
 				n1.pai = this;
 				n2.pai = this;
 				
+				if(filho[0] != null) filho[0].pai = n1; 
 				n1.inserirFilho(filho[0]);
+				if(filho[1] != null) filho[1].pai = n1;
 				n1.inserirFilho(filho[1]);
+				if(filho[2] != null) filho[2].pai = n1;
 				n1.inserirFilho(filho[2]);
+				if(filho[3] != null) filho[3].pai = n2;
 				n2.inserirFilho(filho[3]);
+				if(filho[4] != null) filho[4].pai = n2;
 				n2.inserirFilho(filho[4]);				
 				
 				limparFilhos();
@@ -159,7 +166,9 @@ public class BTree {
 			
 			if( paiNovo.filho[0] == null) {
 				paiNovo.filho[0] = n1;
+				n1.pai = pai;
 				paiNovo.filho[1] = n2;
+				n2.pai = pai;
 			} else {
 				for (int i = 0; i < paiNovo.filho.length; i++) {
 					if (paiNovo.filho[i] != null && paiNovo.filho[i].valor[0] == null) {
