@@ -1,8 +1,8 @@
-public class BTree {
+public class BTree3 {
 	private int ORDEM;
 	private Nodo raiz = null;
 
-	public BTree(int ordem, int[] valoresParaInserir) {
+	public BTree3(int ordem, int[] valoresParaInserir) {
 		this.ORDEM = ordem;
 
 		// inicializa a raiz da arvore
@@ -10,31 +10,29 @@ public class BTree {
 		for (int i = 0; i < valoresParaInserir.length; i++) {
 			inserir(valoresParaInserir[i], raiz);
 
-			System.out.println("NIVEL -> " + (i + 1));
+			System.out.println("NIVEL -> " + (i + 1) + " |"+valoresParaInserir[i]+"|");
 			raiz.imprimir();
 			System.out.println("\n");
 		}
 	}
 
 	public void inserir(int v, Nodo nodo) {
-		if (nodo.temFilhos()) {
-
+		if( nodo.temFilhos() ) {
 			// se tem filho, tem q descobir o nó q insere
-			for (int i = 0; i < nodo.valor.length; i++) {
-				if (nodo.valor[i] == null || v < nodo.valor[i]) {
-					nodo.filho[i].inserir(v);
-					break;
+				for (int i = 0; i < nodo.valor.length; i++) {
+					if ( nodo.valor[i] == null || v < nodo.valor[i]) {
+						inserir(v, nodo.filho[i]);
+						break;
+					}
 				}
-			}
-		
 		} else {
 			nodo.inserir(v);
 		}
 	}
 
 	public static void main(String[] args) {
-		int[] valoresParaInserir = { 3, 7, 10, 24, 14, 19, 21, 15, 1, 5, 2, 8, 9, 6, 11, 12, 17};//, 18, 20, 22, 21, 23, 25};
-		new BTree(5, valoresParaInserir);
+		int[] valoresParaInserir = { 3, 7, 10, 24, 14, 19, 21, 15, 1, 5, 2, 8, 9, 6, 11, 12, 17, 18, 20, 22, 23};// 25};
+		new BTree3(5, valoresParaInserir);
 	}
 
 	class Nodo {
@@ -44,9 +42,6 @@ public class BTree {
 		private Nodo filho[];
 
 		private Nodo pai;
-		
-		private Boolean rodouSplit = false;
-		private Boolean rodouSplit2 = false;
 
 		public Nodo(Nodo pai) {
 			this.pai = pai;
@@ -61,7 +56,8 @@ public class BTree {
 				filho[i] = null;
 		}
 
-		public void inserir(int v) {
+		public Nodo inserir(int v) {
+			Nodo retorno = null;
 			boolean inseriu = false;
 
 			for (int i = 0; i < valor.length; i++) {
@@ -75,18 +71,16 @@ public class BTree {
 			// PROCURA UM ESPAÇO VAZIO, SE NAO ACHAR
 			// TEM Q FAZER SPLIT
 			if (inseriu == false)
-				split(v);
+				retorno = split(v);
 
 			ordenar();
-			
-			rodouSplit = false;
+			return retorno;
 		}
 
-		public void split(int v) {
-			rodouSplit = true;
-			if( rodouSplit == true ) rodouSplit2 = true;
+		public Nodo split(int v) {
 			System.out.println("----------------> RODOU SPLIT");
-			
+			Nodo retorno = null;
+
 			// cria array com um espaço a mais para divisao
 			int aux[] = new int[qtdValores + 1];
 
@@ -110,70 +104,84 @@ public class BTree {
 			limparNodo();
 
 			if (pai == null) {
+				limparNodo();
 				valor[0] = aux[2];
 				// setar filhos
 				n1.pai = this;
 				n2.pai = this;
+				
+				n1.inserirFilho(filho[0]);
+				n1.inserirFilho(filho[1]);
+				n1.inserirFilho(filho[2]);
+				n2.inserirFilho(filho[3]);
+				n2.inserirFilho(filho[4]);				
+				
+				limparFilhos();
 				filho[0] = n1;
 				filho[1] = n2;
+				
+				for(int i=0;i < n1.valor.length; i++) {
+					if( n1.valor[i] != null && n1.valor[i] == v) 
+						retorno = n1;
+				}
+				for(int i=0;i < n2.valor.length; i++) {
+					if( n2.valor[i] != null && n2.valor[i] == v) 
+						retorno = n2;
+				}
+				 
 			} else {
+				//pai.inserir(v);
+				
 				inserirNoPaiComFilhos(aux[metade], n1, n2);
+			}
+			return retorno;
+		}
+
+		public void inserirFilho( Nodo nodo ) {
+			if( nodo != null ) {
+				for (int i = 0; i < valor.length; i++) {
+					if (valor[i] == null ) {
+						filho[i] = nodo;
+						break;
+					} else if( nodo.valor[0] != null && nodo.valor[0] < valor[i] ){
+						filho[i] = nodo;
+						break;
+					}
+				}
 			}
 		}
 
 		public void inserirNoPaiComFilhos(int v, Nodo n1, Nodo n2) {
-			pai.inserir(v);
-
-/*			if( rodouSplit == true ) {
-				if( pai.pai == null ) {
-					Nodo n1aux = new Nodo(this);
-					n1aux.valor[0] = valor[0];
-					n1aux.valor[1] = valor[1];
-					
-					n1aux.filho[0] = filho[0];
-					n1aux.filho[1] = filho[1];
-					n1aux.filho[2] = filho[2];
-					
-	 				Nodo n2aux = new Nodo(this);
-					n2aux.valor[0] = valor[2];
-					n2aux.valor[1] = valor[3];
-					
-					n2aux.filho[0] = filho[3];
-					n2aux.filho[1] = filho[4];
-					
-					limparNodo();
-					
-					valor[0]=v;
-					
-					filho[0]=n1aux;
-					filho[1]=n2aux;
-				}
-			} else {
-				*/
-			//um dos problemas aqui é que o pai q ta tentando incluir nao eh o novo pai
-			//depois q insere no pai, ele cria dois filhos novo no pai,
-			//e esses filhos eh q deveriam ser os pais aqui.
-			//tem q fazer um jeito q depois q retorne da insercao da linha 125,
-			//ele sete o pai para o pai correto para q ele possa fazer o esqeuma no pai correto.
+			Nodo paiNovo = null;
+			paiNovo = pai.inserir(v);
 			
-			for (int i = 0; i < pai.filho.length; i++) {
-					if ( pai.filho[i] != null && pai.filho[i].valor[0] == null ) {
-						pai.filho[i] = n1;
+			if( paiNovo == null ) paiNovo = pai;
+			
+			if( paiNovo.filho[0] == null) {
+				paiNovo.filho[0] = n1;
+				paiNovo.filho[1] = n2;
+			} else {
+				for (int i = 0; i < paiNovo.filho.length; i++) {
+					if (paiNovo.filho[i] != null && paiNovo.filho[i].valor[0] == null) {
+						paiNovo.filho[i] = n1;
 	
 						int posicaoN2 = i + 1;
-						if (pai.filho[posicaoN2] != null) {
+						if (paiNovo.filho[posicaoN2] != null) {
 	
-							for (int w = pai.filho.length - 1; w >= posicaoN2; w--) {
-								if (pai.filho[w] != null)
-									pai.filho[w + 1] = pai.filho[w];
+							for (int w = paiNovo.filho.length - 1; w >= posicaoN2; w--) {
+								if (paiNovo.filho[w] != null)
+									paiNovo.filho[w + 1] = paiNovo.filho[w];
 							}
 	
 						}
-						pai.filho[posicaoN2] = n2;
+						paiNovo.filho[posicaoN2] = n2;
+						System.out.println("<++++++++++++++++++++++++++++++");
 					}
+					//TA COM BUG AQUI!!!
+					//PQ JA TEM NODOS FILHOS. ELE PRECISARIA ENCONTRAR O PRIMEIRO ESPAÇO VAZIO E INSERIR.
 				}
-			//}
-
+			}
+			
 		}
 
 		public void inserirNoPai(int v) {
@@ -193,6 +201,11 @@ public class BTree {
 		public void limparNodo() {
 			for (int i = 0; i < valor.length; i++)
 				valor[i] = null;
+		}
+		
+		public void limparFilhos() {
+			for (int i = 0; i < filho.length; i++)
+				filho[i] = null;
 		}
 
 		private int[] ordenarParaSplit(int[] vaux) {

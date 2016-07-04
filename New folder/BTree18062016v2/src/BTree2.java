@@ -1,8 +1,8 @@
-public class BTree {
+public class BTree2 {
 	private int ORDEM;
 	private Nodo raiz = null;
 
-	public BTree(int ordem, int[] valoresParaInserir) {
+	public BTree2(int ordem, int[] valoresParaInserir) {
 		this.ORDEM = ordem;
 
 		// inicializa a raiz da arvore
@@ -31,22 +31,28 @@ public class BTree {
 			nodo.inserir(v);
 		}
 	}
+	
+	public void inserirFilho(Nodo filho, Nodo nodoAux) {
+			for (int i = 0; i < nodoAux.valor.length; i++) {
+				if (nodoAux.valor[i] == null || filho.valor[1] < nodoAux.valor[i]) {
+					nodoAux.filho[i] = filho;
+					break;
+				}
+			}
+	}
 
 	public static void main(String[] args) {
 		int[] valoresParaInserir = { 3, 7, 10, 24, 14, 19, 21, 15, 1, 5, 2, 8, 9, 6, 11, 12, 17};//, 18, 20, 22, 21, 23, 25};
-		new BTree(5, valoresParaInserir);
+		new BTree2(5, valoresParaInserir);
 	}
 
 	class Nodo {
 		private int qtdValores;
 
-		private Integer valor[];
+		private Integer valor[];	//as chaves do nodo
 		private Nodo filho[];
 
 		private Nodo pai;
-		
-		private Boolean rodouSplit = false;
-		private Boolean rodouSplit2 = false;
 
 		public Nodo(Nodo pai) {
 			this.pai = pai;
@@ -78,13 +84,9 @@ public class BTree {
 				split(v);
 
 			ordenar();
-			
-			rodouSplit = false;
 		}
 
 		public void split(int v) {
-			rodouSplit = true;
-			if( rodouSplit == true ) rodouSplit2 = true;
 			System.out.println("----------------> RODOU SPLIT");
 			
 			// cria array com um espaço a mais para divisao
@@ -117,46 +119,43 @@ public class BTree {
 				filho[0] = n1;
 				filho[1] = n2;
 			} else {
-				inserirNoPaiComFilhos(aux[metade], n1, n2);
+				pai.inserir(v);
+				//a ideia seria mandar inserir no pai normalmente,
+				//e daí no final, ir até a raiz, e mandar inserir os nodos filhos,
+				//e daí o script achar onde devem ficar esses nodos filhos
+				
+				//inserirNoPaiComFilhos(aux[metade], n1, n2);
 			}
 		}
 
 		public void inserirNoPaiComFilhos(int v, Nodo n1, Nodo n2) {
 			pai.inserir(v);
 
-/*			if( rodouSplit == true ) {
-				if( pai.pai == null ) {
-					Nodo n1aux = new Nodo(this);
-					n1aux.valor[0] = valor[0];
-					n1aux.valor[1] = valor[1];
-					
-					n1aux.filho[0] = filho[0];
-					n1aux.filho[1] = filho[1];
-					n1aux.filho[2] = filho[2];
-					
-	 				Nodo n2aux = new Nodo(this);
-					n2aux.valor[0] = valor[2];
-					n2aux.valor[1] = valor[3];
-					
-					n2aux.filho[0] = filho[3];
-					n2aux.filho[1] = filho[4];
-					
-					limparNodo();
-					
-					valor[0]=v;
-					
-					filho[0]=n1aux;
-					filho[1]=n2aux;
-				}
+			/*if( pai.pai == null ) {
+				Nodo n1aux = new Nodo(this);
+				n1aux.valor[0] = valor[0];
+				n1aux.valor[1] = valor[1];
+				
+				n1aux.filho[0] = filho[0];
+				n1aux.filho[1] = filho[1];
+				n1aux.filho[2] = filho[2];
+				
+ 				Nodo n2aux = new Nodo(this);
+				n2aux.valor[0] = valor[2];
+				n2aux.valor[1] = valor[3];
+				
+				n2aux.filho[0] = filho[3];
+				n2aux.filho[1] = filho[4];
+				
+				limparNodo();
+				
+				valor[0]=v;
+				
+				filho[0]=n1aux;
+				filho[1]=n2aux;
+				
 			} else {
-				*/
-			//um dos problemas aqui é que o pai q ta tentando incluir nao eh o novo pai
-			//depois q insere no pai, ele cria dois filhos novo no pai,
-			//e esses filhos eh q deveriam ser os pais aqui.
-			//tem q fazer um jeito q depois q retorne da insercao da linha 125,
-			//ele sete o pai para o pai correto para q ele possa fazer o esqeuma no pai correto.
-			
-			for (int i = 0; i < pai.filho.length; i++) {
+				*/for (int i = 0; i < pai.filho.length; i++) {
 					if ( pai.filho[i] != null && pai.filho[i].valor[0] == null ) {
 						pai.filho[i] = n1;
 	
