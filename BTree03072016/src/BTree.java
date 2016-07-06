@@ -14,8 +14,136 @@ public class BTree {
 			raiz.imprimir();
 			System.out.println("\n");
 		}
-		System.out.println("FIMMMMMMMMMMMMMMMMMMMM");
 		
+		remover(21, raiz);
+				
+		System.out.println(".....................................");
+		raiz.imprimir();
+		System.out.println(".....................................");
+		
+		remover(20, raiz);
+		
+		System.out.println(".....................................");
+		raiz.imprimir();
+		System.out.println(".....................................");
+		
+		/*
+		 * https://pt.wikipedia.org/wiki/%C3%81rvore_B
+		 * FAZER O CASO 3
+		 */
+		
+		remover(11, raiz);
+		
+		System.out.println(".....................................");
+		raiz.imprimir();
+		System.out.println(".....................................");
+		
+		System.out.println("FIMMMMMMMMMMMMMMMMMMMM");		
+	}
+	
+	private void remover(int v, Nodo nodo) {
+		System.out.println("passou pelo remover!<---------------");
+		
+		int posicaoEncontrado = -1;
+		boolean encontrou = false;
+		
+		//procura nesse nodo
+		if(nodo != null) {
+			for (int i = 0; i < nodo.valor.length; i++) 
+				if ( nodo.valor[i] != null && v == nodo.valor[i] ) {
+					encontrou = true;
+					posicaoEncontrado=i;
+					//break; //ver se precisa disso
+				}
+		
+			if( encontrou ) {
+				//se encontrou remove
+				System.out.println("ENCONTROU A BAGAÇA!!!!_____________________________________");
+				
+				if( nodo.temFilhos() == false ) {  
+					if(nodo.quantidadeValores() > ORDEM/2) {
+						removeValorEPuxaPraEsquerda(nodo, posicaoEncontrado);
+					} else { //entao eh remocao na folha COM UNDERFLOW
+						
+						//remove o valor
+						removeValorEPuxaPraEsquerda(nodo, posicaoEncontrado);
+						
+						Nodo irmaoEsquerda = null;
+						Nodo irmaoDireita = null;
+						int posicaoDesteNodoFilhoNoPai=0;
+						
+						//pega nodos irmaos
+						Nodo pai = nodo.pai;
+						for (int i = 0; i < pai.filho.length; i++) {
+							if( pai.filho[i].valor[0] != null && pai.filho[i].valor[0] == nodo.valor[0] ) {
+								System.out.println("PASSOU AQUII++++++++++++++++++++++++++");
+								posicaoDesteNodoFilhoNoPai = i;
+								if( i-1 >=0 ) irmaoEsquerda = pai.filho[i-1];
+								if( i+1 <=3 ) irmaoDireita = pai.filho[i+1];
+								break;
+							}
+						}
+						
+						//verifica se da pra fazer a juncao com o irmao da esquerda
+						if( irmaoEsquerda.quantidadeValores() > ORDEM/2 ) {
+							//insere valor do pai neste nodo
+							nodo.inserir( pai.valor[posicaoDesteNodoFilhoNoPai-1] );
+							
+							//procura o valor no irmao
+							Integer valorIrmaoErquerda = null;
+							for (int i = 0; i < nodo.valor.length; i++) 
+								if ( nodo.valor[i] == null ) {
+									valorIrmaoErquerda = irmaoEsquerda.valor[i];
+									irmaoEsquerda.valor[i] = null;	//apaga valor do irmao da esquerda!!
+									break;
+								}
+							
+							//coloca o valor no pai
+							pai.valor[ posicaoDesteNodoFilhoNoPai-1 ] = valorIrmaoErquerda;
+							
+						} else if( irmaoDireita.quantidadeValores() > ORDEM/2 ) {  //se nao der pra fazer a juncao a esquerda ve se rola a direita
+							//insere valor do pai neste nodo
+							nodo.inserir( pai.valor[posicaoDesteNodoFilhoNoPai] );
+							
+							//procura o valor no irmao
+							Integer valorIrmaoDireita = irmaoDireita.valor[0];
+							//remove valor do irmao da esquerda!!
+							removeValorEPuxaPraEsquerda(irmaoDireita, 0);
+							
+							//coloca o valor no pai
+							pai.valor[ posicaoDesteNodoFilhoNoPai ] = valorIrmaoDireita;
+						}
+						
+					}
+				}
+				
+				System.out.println("SHOW");
+			} else if( nodo.temFilhos() ) {
+				//se nao encontrou e tem filhos, tem q ver em qual filho procurar
+				int posicao = -1;
+				for (int i = 0; i < nodo.valor.length; i++) 
+					if ( nodo.valor[i] == null || v < nodo.valor[i] ) {
+						posicao=i;
+						break;
+					}
+				
+				remover(v, nodo.filho[posicao]);
+			} else {
+				System.out.println("Valor não encontrado na BTree");
+			}
+		}
+	}
+
+	private void removeValorEPuxaPraEsquerda(Nodo nodo, int posicaoEncontrado) {
+		nodo.valor[posicaoEncontrado] = null;
+		//puxa todos os valores para a esquerda
+		for (int k = posicaoEncontrado; k < nodo.valor.length; k++) {
+			if( k+1 < 4 ) {
+				Integer proximoNodo = nodo.valor[k+1];
+				if(proximoNodo == null) nodo.valor[k] = null;
+				else nodo.valor[k] = proximoNodo;
+			}
+		}
 	}
 
 	public void inserir(int v, Nodo nodo) {
@@ -77,6 +205,14 @@ public class BTree {
 
 			ordenar();
 			return retorno;
+		}
+		
+		int quantidadeValores() {
+			int quantidade = 0;
+			for (int i = 0; i < valor.length; i++) {
+				if( valor[i] != null ) quantidade++; 
+			}
+			return quantidade;
 		}
 
 		public Nodo split(int v) {
